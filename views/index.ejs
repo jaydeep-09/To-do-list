@@ -15,11 +15,14 @@
 
             <% for(var i=0;i<item_to_add.length;i++){  %>
 
-                <div class="item">
-                    <input type="checkbox">
-                    <p><%=item_to_add[i]%></p>
+                <form action="/delete" method="POST">
 
-                </div>
+                    <div class="item">
+                        <input name="checkbox" value="<%= item_to_add[i]._id %>" type="checkbox" onclick="this.form.submit()">
+                        <p><%=item_to_add[i].name%></p>
+    
+                    </div>
+                </form>
                 
             <% } %>
 

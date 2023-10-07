@@ -51,9 +51,9 @@ const work3=new Item({
 
 const defaultItem=[work1,work2,work3];
 
-async function insertmany(){
+async function insertmany(items){
 
-    await Item.insertMany(defaultItem);
+    await Item.insertMany(items);
     
 }
 
@@ -69,15 +69,15 @@ app.get("/",function(req,res){
         const itemlist=await Item.find();
 
         if(!itemlist){
-            // if NULL
+            // if NULL then insert a default items in Item this only done onece it is started then it will not work
             Item.insertMany(defaultItem);
             res.redirect("/");
         }
         else {
-            // if exist
+            // if exist then rensder that list
             res.render('index',{ListTitle:"today",item_to_show:itemlist,name:Name});
         }
-        // console.log(itemlist);
+        
     }
     
     getdata();
@@ -92,23 +92,24 @@ app.get("/:customListName" ,function(req,res){
 
     async function create(customName){
 
+
+        // before creating any new list first we check it already exis in the database 
         const found=await List.findOne({name:customName});
 
         if(!found){
-            // not found
+            // not found then we create a new list
             const customList=new List({
                 name:customName,
                 items:defaultItem
             });
         
             customList.save();
-
+            // AFTER SAVING WE RENDER TO THE SAME ROUTE
             res.redirect("/"+customName);
-            
-            // console.log(found);
+
         }
         else {
-            // found
+            // found we render that list
             res.render('index',{ListTitle:found.name,item_to_show:found.items,name:Name});
         }
     } 
@@ -121,18 +122,23 @@ app.post("/",function(req,res){
     
    
     var checkname=req.body.fname;
+    // this is the name of the user 
     var checkpage=req.body.list;
+    // this is the list of the page you are on
 
     const itemname=req.body.item_to_add;
 
     if(checkname.length>0){
+        // if some of the input are given in the input box
         Name=checkname;
     }
 
+    // here we create a new item 
     const newitem=new Item({
         name:itemname
     });
 
+    // if it belongs to the same routes
     if(checkpage==="today"){
         
         if(itemname.length>0){
@@ -140,19 +146,28 @@ app.post("/",function(req,res){
         }
         
         res.redirect("/");
+        // then redirect to same page as things got changes then new changes should be visible by redircting ans then rendering
     }
     else{
 
+        // if it is different list the home ot "/" the updata the list 
         async function check(checkPage){
 
+            // to updata first we find it then update it 
             const foundList=await List.findOne({name:checkPage});
 
             if(!foundList){
+                // if not found then NULL then we redirect to the same routs or pram from where it comes from
+
                 console.log("something wrong in updating curr list items");
                 res.redirect("/"+checkPage);
+
             }
             else{
                 // console.log(foundList);
+                // if exist then we check it is he new element or not then we push in existing list ans save it 
+                // then redirect it to the same route from where it comes from
+
                 if(itemname.length>0){
     
                     foundList.items.push(newitem);
@@ -174,6 +189,7 @@ app.post("/",function(req,res){
 
 app.post("/delete",function(req,res){
 
+    // to delete a item we got a submit response by oncheck so afer the we callto del function
     const itemtodelete=req.body.checkbox;
 
     async function del(item){
@@ -185,6 +201,7 @@ app.post("/delete",function(req,res){
     
     // console.log(itemtodelete);
     res.redirect("/")
+    
 })
 
 

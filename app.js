@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 mongoose.connect("mongodb://127.0.0.1:27017/todolistDB")
 .then(
     ()=>{
-        console.log("successfull.......");
+        console.log("mongodb connection is successfull.......");
     }
 )
 .catch((err)=>{
@@ -57,33 +57,27 @@ async function insertmany(){
     
 }
 
-// insertmany();
-// Item.insertMany(defaultItem);
-
-
-
-
-
-// var lists=[];
 var Name="";
-// var work_list=[];
+
   
   
 app.get("/",function(req,res){
 
 
-    var today=date();
+    var Today=date();
     async function getdata(){
         const itemlist=await Item.find();
 
-        if(itemlist.length===0){
+        if(!itemlist){
+            // if NULL
             Item.insertMany(defaultItem);
             res.redirect("/");
         }
         else {
-            res.render('index',{ListTitle:today,item_to_add:itemlist,name:Name});
+            // if exist
+            res.render('index',{ListTitle:"today",item_to_show:itemlist,name:Name});
         }
-        console.log(itemlist);
+        // console.log(itemlist);
     }
     
     getdata();
@@ -96,72 +90,85 @@ app.get("/:customListName" ,function(req,res){
 
     const customListName=req.params.customListName;
 
-    async function create(){
+    async function create(customName){
 
-        const found=await List.findOne({name:customListName});
+        const found=await List.findOne({name:customName});
 
-        const customList=new List({
-            name:customListName,
-            items:defaultItem
-        });
-    
-        if(!found)customList.save();
-
-        console.log(customListName);
-    }
+        if(!found){
+            // not found
+            const customList=new List({
+                name:customName,
+                items:defaultItem
+            });
         
-    create();
+            customList.save();
+
+            res.redirect("/"+customName);
+            
+            // console.log(found);
+        }
+        else {
+            // found
+            res.render('index',{ListTitle:found.name,item_to_show:found.items,name:Name});
+        }
+    } 
+        
+    create(customListName);
 
 })
 
 app.post("/",function(req,res){
     
-    // var item=req.body.item_to_add;
+   
     var checkname=req.body.fname;
-    // var checkpage=req.body.list;
+    var checkpage=req.body.list;
 
     const itemname=req.body.item_to_add;
+
+    if(checkname.length>0){
+        Name=checkname;
+    }
 
     const newitem=new Item({
         name:itemname
     });
 
-    if(itemname.length>0){
-        newitem.save();
+    if(checkpage==="today"){
+        
+        if(itemname.length>0){
+            newitem.save();
+        }
+        
+        res.redirect("/");
     }
-   
-    if(checkname.length>0){
-        Name=checkname;
+    else{
+
+        async function check(checkPage){
+
+            const foundList=await List.findOne({name:checkPage});
+
+            if(!foundList){
+                console.log("something wrong in updating curr list items");
+                res.redirect("/"+checkPage);
+            }
+            else{
+                // console.log(foundList);
+                if(itemname.length>0){
+    
+                    foundList.items.push(newitem);
+    
+                    foundList.save();
+                }
+    
+                res.redirect("/"+checkPage);
+            }
+
+        }
+
+        check(checkpage);
+
+       
     }
-
-    res.redirect("/");
-   
-
-    
-    // if(checkpage==="work list"){
-        
-    //     if(item.length>0)work_list.push(item);
-    //     res.redirect("/work");
-        
-    // }
-    // else{
-
-        
-    //     if(checkname.length>1){
-    
-    //         Name=checkname;
-            
-    //     }
-    
-    //     if(item.length>0)lists.push(item);
-        
-    //     // console.log(item);
-    
-    
-    //    res.redirect("/");
-
-    // }
-
 
 });
 
@@ -176,18 +183,12 @@ app.post("/delete",function(req,res){
 
     del(itemtodelete);
     
-    console.log(itemtodelete);
-
+    // console.log(itemtodelete);
     res.redirect("/")
 })
 
-app.get("/work",function(req,res){
-    
-    res.render("index",{ListTitle: "work list",item_to_add:work_list,name:Name});
-    
-});
 
-
+ 
 app.get("/about",function(req,res){
 
     res.render("about");

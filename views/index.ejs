@@ -4,7 +4,7 @@
         
         <h1> <%= ListTitle %> </h1>
 
-        <h1> <%=name %> to do list</h1>
+        <h1> <%=name %>'s to do list</h1>
         
     </div>
        
@@ -13,13 +13,13 @@
 
 
 
-            <% for(var i=0;i<item_to_add.length;i++){  %>
+            <% for(var i=0;i<item_to_show.length;i++){  %>
 
                 <form action="/delete" method="POST">
 
                     <div class="item">
-                        <input name="checkbox" value="<%= item_to_add[i]._id %>" type="checkbox" onclick="this.form.submit()">
-                        <p><%=item_to_add[i].name%></p>
+                        <input name="checkbox" value="<%= item_to_show[i]._id %>" type="checkbox" onclick="this.form.submit()">
+                        <p><%=item_to_show[i].name%></p>
     
                     </div>
                 </form>
@@ -29,7 +29,7 @@
             <div>
                 <form action="/" method='post'>
         
-                    <input type="text"name="item_to_add" placeholder="add items !" autocomplete="off">
+                    <input type="text" name="item_to_add" placeholder="add items !" autocomplete="off">
         
                     <input type="text" name="fname" placeholder="Name">
         

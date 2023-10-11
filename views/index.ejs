@@ -19,6 +19,7 @@
 
                     <div class="item">
                         <input name="checkbox" value="<%= item_to_show[i]._id %>" type="checkbox" onclick="this.form.submit()">
+                        <input type="hidden" name="ListName" value="<%= ListTitle %>">
                         <p><%=item_to_show[i].name%></p>
     
                     </div>
@@ -33,7 +34,7 @@
         
                     <input type="text" name="fname" placeholder="Name">
         
-                    <button type="submit" name="list" value="<%= ListTitle %>">+</button>
+                    <button type="submit" name="list" value="<%= ListTitle %>>+</button>
                 </form>
             </div>
 

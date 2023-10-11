@@ -191,16 +191,30 @@ app.post("/delete",function(req,res){
 
     // to delete a item we got a submit response by oncheck so afer the we callto del function
     const itemtodelete=req.body.checkbox;
+    const ListName=req.body.ListName;
 
-    async function del(item){
+    async function del(item,listName){
+
+        if(listName==='today'){
+
+            await Item.findByIdAndRemove(item);
+            res.redirect("/");
+
+        }
+        else{
+
+            await listName.findByIdAndRemove(item);
+
+            res.redirect("/"+listName);
+
+        }
         
-        await Item.findByIdAndRemove(item);
     };
 
-    del(itemtodelete);
+    del(itemtodelete,ListName);
     
     // console.log(itemtodelete);
-    res.redirect("/")
+    
     
 })
 

@@ -3,7 +3,7 @@ const express=require("express");
 const bodyParser=require("body-parser");
 const mongoose=require("mongoose");
 const { todo } = require("node:test");
-
+const _= require('lodash');
 const app=express();
 
 const date=require(__dirname+"/date.js");
@@ -13,8 +13,9 @@ app.use(express.static("public"));
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 
-
-mongoose.connect("mongodb://127.0.0.1:27017/todolistDB")
+const dburl="mongodb://jaydeep:jay123@ac-9tm73od-shard-00-00.nq0bf5y.mongodb.net:27017,ac-9tm73od-shard-00-01.nq0bf5y.mongodb.net:27017,ac-9tm73od-shard-00-02.nq0bf5y.mongodb.net:27017/?ssl=true&replicaSet=atlas-7ommk5-shard-0&authSource=admin&retryWrites=true&w=majority";
+// const dburl="mongodb://127.0.0.1:27017/todolistDB";
+mongoose.connect(dburl)
 .then(
     ()=>{
         console.log("mongodb connection is successfull.......");
@@ -88,7 +89,8 @@ app.get("/",function(req,res){
 // dynamic routes
 app.get("/:customListName" ,function(req,res){
 
-    const customListName=req.params.customListName;
+    const customListName=_.capitalize(req.params.customListName);
+    // capitilize to make first letter capital and other small by lodash 
 
     async function create(customName){
 
@@ -121,8 +123,9 @@ app.get("/:customListName" ,function(req,res){
 app.post("/",function(req,res){
     
    
-    var checkname=req.body.fname;
+    var checkname=_.capitalize(req.body.fname);
     // this is the name of the user 
+
     var checkpage=req.body.list;
     // this is the list of the page you are on
 
@@ -193,23 +196,26 @@ app.post("/delete",function(req,res){
     const itemtodelete=req.body.checkbox;
     const ListName=req.body.ListName;
 
-    async function del(item,listName){
+    async function del(item_Id,listName){
 
         if(listName==='today'){
 
-            await Item.findByIdAndRemove(item);
+            await Item.findByIdAndRemove(item_Id);
             res.redirect("/");
 
         }
         else{
 
-            await listName.findByIdAndRemove(item);
-
-            res.redirect("/"+listName);
+            // this push and pushall cmd is used in mongodb which makes easier to find the object or element in an array of document
+            await List.findOneAndUpdate({name:listName}, {$pull : {items : {_id : item_Id }}});
+            
+            res.redirect ("/"+listName);
 
         }
         
     };
+
+   
 
     del(itemtodelete,ListName);
     
